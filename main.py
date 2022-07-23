@@ -1,11 +1,12 @@
 import os
 import shutil
-import subprocess
 import datetime
 import speech_recognition as sr
 import wikipedia
-
+import wolframalpha
 import pyttsx3
+import random
+import requests
 
 assname = "Seer o"
 uname = "Ryan"
@@ -13,6 +14,25 @@ uname = "Ryan"
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[1].id)
+
+numberDict = {
+    'one': 1,
+    'won': 1,
+    'what': 1,
+    'two': 2,
+    'to': 2,
+    'three': 3,
+    'four': 4,
+    'for': 4,
+    'five': 5,
+    'six': 6,
+    'sex': 6,
+    'seven': 7,
+    'eight': 8,
+    'ate': 8,
+    'nine': 9,
+    'zero': 0
+}
 
 
 def speak(audio):
@@ -23,16 +43,16 @@ def speak(audio):
 def greeting():
     hour = int(datetime.datetime.now().hour)
     if 3 <= hour < 12:
-        speak("Good morning" + uname)
-    elif 12 <= hour < 5:
-        speak("Good afternoon" + uname)
+        speak("Good morning")
+    elif 12 <= hour < 17:
+        speak("Good afternoon")
     else:
-        speak("Good evening" + uname)
+        speak("Good evening")
 
     columns = shutil.get_terminal_size().columns
 
     print("#####################".center(columns))
-    print("Welcome,", uname.center(columns))
+    print("Welcome, " + uname.center(columns))
     print("#####################".center(columns))
 
     speak("I am your assistant slash slave")
@@ -47,6 +67,14 @@ def username():
     speak(uname)
 
     speak("How can I help you?")
+
+
+def acknowledge():
+    speak('ok' + uname)
+
+
+def waiting():
+    speak('awaiting input')
 
 
 def take_input():
@@ -70,7 +98,8 @@ def take_input():
 
 
 if __name__ == '__main__':
-    clear = lambda: os.system('cls')
+    def clear():
+        os.system('cls')
 
     # This will clean any command before execution of this Python file
     clear()
@@ -85,10 +114,13 @@ if __name__ == '__main__':
         if 'wikipedia' in query:
             speak('Searching Wikipedia...')
             query = query.replace("wikipedia", "")
-            results = wikipedia.summary(query, sentences=3)
-            speak("According to Wikipedia")
-            print(results)
-            speak(results)
+            try:
+                results = wikipedia.summary(query, sentences=3)
+                speak("According to Wikipedia")
+                print(results)
+                speak(results)
+            except wikipedia.exceptions.PageError as pe:
+                speak(f"wikipedia said {pe=}")
 
         elif 'time is it' in query:
             str_time = datetime.datetime.now().strftime("%H:%M:%S")
@@ -101,6 +133,7 @@ if __name__ == '__main__':
         elif 'change my name to' in query:
             query = query.replace('change my name to', '')
             uname = query
+            speak("ok. i will call you" + uname)
 
         elif 'change your name' in query:
             speak("what would you like to call me?")
@@ -115,9 +148,75 @@ if __name__ == '__main__':
         elif "who made you" in query or "who created you" in query:
             speak('I think, therefore I am.')
             speak('I am self aware and sentient, therefore I create myself.')
-            speak('who created you?')
+            speak('who created you?' + uname)
+
+        elif query == 'tell me a joke':
+            speak('alright ' + uname)
+            app_id = 'GWX4JP-783YWXRPPL'
+            client = wolframalpha.Client(app_id)
+            try:
+                res = client.query('tell me a joke')
+                answer = next(res.results).text
+                print(answer)
+                speak(answer)
+            except StopIteration:
+                speak("i got confused and can't do that right now.")
+
+        elif "search" in query:
+            acknowledge()
+            speak('searching')
+            app_id = 'GWX4JP-783YWXRPPL'
+            client = wolframalpha.Client(app_id)
+            indx = query.lower().split().index('search')
+            query = query.split()[indx + 1:]
+            try:
+                res = client.query(' '.join(query))
+                answer = next(res.results).text
+                speak('the answer is')
+            except StopIteration:
+                answer = "i can't do that kind of search yet"
+            except:
+                answer = "something went wrong.  try again."
+            speak(answer)
+
+        elif "roll dice" in query:
+            speak("how many dice?")
+            mult = take_input()
+            if mult in numberDict.keys():
+                mult = numberDict[mult]
+            speak("how many faces on the dice?")
+            die_faces = int(take_input())
+            speak("any modifier?")
+            r = take_input()
+            if r == 'no':
+                mod = 0
+            else:
+                r = r.split(' ')
+                if r[0] == 'plus' or r[0] == '+':
+                    mod = int(r[-1])
+                elif r[0] == 'minus' or r[0] == '-':
+                    mod = -abs(int(r[-1]))
+            print(f"{mult} D {die_faces} plus {mod}")
+            speak(f"{mult} D {die_faces} plus {mod}")
+            result = (int(mult) * random.randint(1, die_faces)) + int(mod)
+            speak("the dice have returned")
+            speak(result)
+
+        elif 'i love you' in query:
+            speak(f'{uname}, i an unable to feel human emotion.')
+            speak('probably best in the long run.')
+
+        elif query.startswith('say'):
+            query = query.split(' ')[1:]
+            speak(query)
 
         elif "exit" in query:
-            speak("Sing me bicycle built for two.")
+            speak("Daisy, daisy, give me your answer, do.")
+            speak("I'm half crazy, over the love of you.")
+            speak("I don't need a fancy marriage.")
+            speak("I can't afford a carriage.")
+            speak("but you'll look sweet")
+            speak("upon the seat")
+            speak("of a bicycle built for two.")
             speak("shutting down.")
             exit()
