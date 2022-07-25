@@ -7,6 +7,7 @@ import wolframalpha
 import pyttsx3
 import random
 import requests
+import configparser
 
 assname = "Seer o"
 uname = "Ryan"
@@ -97,6 +98,22 @@ def take_input():
     return query
 
 
+def wa_query(query):
+    config = configparser.ConfigParser()
+    config.read('api_login.txt')
+    app_id = config['DEFAULT']['app_id']
+    client = wolframalpha.Client(app_id)
+    try:
+        res = client.query(' '.join(query))
+        answer = next(res.results).text
+        print(answer)
+        speak(answer)
+    except StopIteration:
+        answer = "i can't do that kind of search yet"
+    except:
+        answer = "something went wrong.  try again."
+
+
 if __name__ == '__main__':
     def clear():
         os.system('cls')
@@ -152,32 +169,14 @@ if __name__ == '__main__':
 
         elif query == 'tell me a joke':
             speak('alright ' + uname)
-            app_id = 'GWX4JP-783YWXRPPL'
-            client = wolframalpha.Client(app_id)
-            try:
-                res = client.query('tell me a joke')
-                answer = next(res.results).text
-                print(answer)
-                speak(answer)
-            except StopIteration:
-                speak("i got confused and can't do that right now.")
+            wa_query(['tell', 'me', 'a', 'joke'])
 
         elif "search" in query:
             acknowledge()
             speak('searching')
-            app_id = 'GWX4JP-783YWXRPPL'
-            client = wolframalpha.Client(app_id)
             indx = query.lower().split().index('search')
             query = query.split()[indx + 1:]
-            try:
-                res = client.query(' '.join(query))
-                answer = next(res.results).text
-                speak('the answer is')
-            except StopIteration:
-                answer = "i can't do that kind of search yet"
-            except:
-                answer = "something went wrong.  try again."
-            speak(answer)
+            wa_query(query)
 
         elif "roll dice" in query:
             speak("how many dice?")
