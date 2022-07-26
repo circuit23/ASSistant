@@ -58,6 +58,9 @@ if __name__ == '__main__':
             uname = query
             speak("ok. i will call you" + uname)
 
+        elif 'change my name' in query:
+            username()
+
         elif 'change your name' in query:
             speak("what would you like to call me?")
             assname = take_input()
