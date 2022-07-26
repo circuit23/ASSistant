@@ -130,3 +130,9 @@ if __name__ == '__main__':
             speak("of a bicycle built for two.")
             speak("shutting down.")
             exit()
+
+        else:
+            speak("I'm not sure how to understand what you just said.")
+            speak("Perhaps if you try again, but use grown up words.")
+
+        waiting()
