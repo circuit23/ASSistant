@@ -17,12 +17,14 @@ voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[1].id)
 
 numberDict = {
+    'zero': 0,
     'one': 1,
     'won': 1,
     'what': 1,
     'two': 2,
     'to': 2,
     'three': 3,
+    'free': 3,
     'four': 4,
     'for': 4,
     'five': 5,
@@ -32,7 +34,8 @@ numberDict = {
     'eight': 8,
     'ate': 8,
     'nine': 9,
-    'zero': 0
+    'ten': 10,
+    'tend': 10,
 }
 
 
@@ -171,7 +174,7 @@ if __name__ == '__main__':
             speak('alright ' + uname)
             wa_query(['tell', 'me', 'a', 'joke'])
 
-        elif "search" in query:
+        elif "search" in query or "calculate" in query:
             acknowledge()
             speak('searching')
             indx = query.lower().split().index('search')
@@ -197,9 +200,14 @@ if __name__ == '__main__':
                     mod = -abs(int(r[-1]))
             print(f"{mult} D {die_faces} plus {mod}")
             speak(f"{mult} D {die_faces} plus {mod}")
-            result = (int(mult) * random.randint(1, die_faces)) + int(mod)
-            speak("the dice have returned")
-            speak(result)
+            dice_list = []
+            for x in range(int(mult)):
+                dice_list.append(random.randint(1, die_faces))
+            speak(f"the dice rolled {dice_list}")
+            print(f"The dice rolled {dice_list}")
+            result = sum(dice_list) + int(mod)
+            speak(f"for a total of {result}")
+            print(f"Total: {result}")
 
         elif 'i love you' in query:
             speak(f'{uname}, i an unable to feel human emotion.')
